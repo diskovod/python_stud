@@ -45,7 +45,8 @@ class DirectoryScanner(object):
     def getPid(self):
 	wp = os.path.dirname(os.path.realpath(__file__))
 	curr_pid = os.getpid()
-
+	reg_get_pid = "[\d]+"
+	reg_get_path = "/(.*?)/$"
         if os.path.exists(str(wp) +"/"+"mysript.pid"):
 	    wp_f = file(str(wp) + "/"+"myscript.pid", "r+")
 	    wp_f.write("Pid: %s, Working Path: %s" % (str(curr_pid), str(wp)))
