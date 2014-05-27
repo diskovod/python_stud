@@ -59,7 +59,8 @@ class getDescriptor(object):
 				except OSError:
 					continue
 					
-			print open_files
+		for link in sorted(open_files.keys()):
+			print "%s : %s" % (link, "".join(map(str, open_files[link])))
 				
 	def getPath(self, files):
 	
