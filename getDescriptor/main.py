@@ -53,7 +53,7 @@ class getDescriptor(object):
 					if files_only != "":	
 						#int(pid)
 						open_files.setdefault(link, []).append(pid)	
-						open_files[pid] = open_files
+						open_files[pid] = files_only
 						#open_files.update({pid: files_only})
 						
 				except OSError:
