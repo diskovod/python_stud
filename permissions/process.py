@@ -25,24 +25,31 @@ class PrintPr(object):
         
         cur_pid = os.getpid()
         print "I'm parent: %s" % (cur_pid)
-        pid = os.fork()
 
-        if pid > 0:
+        for i in range(0,2):
+            pid = os.fork()
+
+            if pid:
             
-            print "I'm child: %s" % (pid)
-            chld_id = pid
+                print "I'm child: %s" % (pid)
+                chldlist.append(pid)
            
-        else:
-            c_pid = os.getpid()
-            g_name = pwd.getpwnam("nobody")
-            nby_id = g_name.pw_uid
-            nby_gid = g_name.pw_gid
+            else:
+                c_pid = os.getpid()
+                g_name = pwd.getpwnam("nobody")
+                nby_id = g_name.pw_uid
+                nby_gid = g_name.pw_gid
 
-            set_gid = os.setgid(nby_gid)
-            set_uid = os.seteuid(nby_id)
+                set_gid = os.setgid(nby_gid)
+                set_uid = os.seteuid(nby_id)
                 
-            pid_cl.createPidFile(c_pid)
-            time.sleep(50)
+                pid_cl.createPidFile(c_pid)
+                #time.sleep(50)
+                break;
+
+        for childf in childlist:
+            os.kill(child, SIGKILL)
+           
         #fout.write('\nEnd of file')
 
 pr = PrintPr()
