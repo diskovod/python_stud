@@ -5,34 +5,26 @@ import os
 import time
 from multiprocessing import Queue
 from multiprocessing import Process
+from Queue import Empty
 
 
 class Child(object):
-    def __init__(self):
-        pass
-        #signal.signal(signal.SIGTERM, self.child_signal_handler)
+    def __init__(self, queue):
+        self.queue = queue
 
-   # def child_signal_handler(self, signal, frame):
-       
-   #     isClosed = os.kill(self.pid, 0)
-
-    #    if isClosed == None:
-
-     #       print "Child %d closed!" % (self.pid)
-     #       sys.exit(0)
-        
-      #  else:
-
-       #     print "Child still working..."
 
     def setPid(self, pid):
         self.pid = pid
 
-    def Run(self, queue):
-        self.alive = True
-        while True:
+    def Run(self):
+        
+        try:
+            self.queue.get()
+            print 'I found something new my id: %s' % (self.pid)
+            print self.queue.get()
+        except Empty, e:
+            print 'Found nothing in the queue'
             
-            print "Timestamp: %s, Child_id: %s" % (queue.get(), self.pid)
 
 
 class Parent(object):
@@ -43,28 +35,31 @@ class Parent(object):
     def writeToQueue(self):
         
         while True:
-            
             ts = time.time()
             st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
             self.q.put(st)
 
-            #print self.q.get()
+#            print self.q.get()
+             
             time.sleep(1)
-
+           
     def CreateChild(self):
-        child = Child()
+        child = Child(self.q)
         cur_pid = os.getpid()
 
         pid = os.fork()
         if pid > 0:
             
+            print "I'm parent with id: %s" % (cur_pid)
+            print "My child is: %s" % (pid)
+            self.writeToQueue()
             self.childlist.append(pid)
         
         else:
         
           #  print "Parent pid is: %d" % (cur_pid)
             child.setPid(os.getpid())
-            child.Run(self.q)
+            child.Run()
 
 pr = Parent()
 

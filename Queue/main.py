@@ -22,18 +22,12 @@ class Parent(object):
             print self.q.get()
             time.sleep(1)
 
-    #def readingQueueByChld(self):
-    def getParentPid(self):
-        pr_pid = os.getpid()
 
-        print pr_pid
-
-    def info(self):
-       # if hasattr(os, 'getppid'):  # only available on Unix
-          #  print('parent process:', os.getppid())
+    def processInfo(self):
+        
         print('process id:', os.getpid())
 
-    def f(self,name):
+    def readingQueue(self):
         self.info()
         print('hello', name)
 
