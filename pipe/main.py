@@ -40,20 +40,20 @@ class Child (threading.Thread):
 
         print "Starting " + self.name
         
-        pipein = open(self.pipe_name, 'r')
+        with open(self.pipe_name, 'r') as pipein:
 
-        while not self.event.is_set():
+            while not self.event.is_set():
             
-            line = pipein.readline()
+                line = pipein.readline()[:-1]
 
-            print "Child %d got %s" % (os.getpid(), line)
+                print "Child %d got %s" % (os.getpid(), line)
             
-            time.sleep(2)
+                time.sleep(2)
 
 class Parent(object):
     def __init__(self):
 
-        self.pipe_name = "/tmp/test_pipe"
+        self.pipe_name = "/work/test_pipe.txt"
         
         self.event = threading.Event()
 
@@ -62,31 +62,31 @@ class Parent(object):
         
         signal.signal(signal.SIGTERM, self.signal_term_handler)
         
-        
         self.cur_pid = os.getpid()
 
-
     def writeToFifo(self):
-
+            
         if not os.path.exists(self.pipe_name):
-        
-            if os.mkfifo(self.pipe_name) == -1:
+       
+            try:
 
-                print "Cant create FiFo file"
-            
-        
-        
-      #  while True:
-            
-            
-        pipeout = open(self.pipe_name, 'w')
-        ts = time.time()
-        st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-        pipeout.write(st)
-    
-        pipeout.close()
+                os.mkfifo(self.pipe_name, 0777)
 
-    #    time.sleep(1)
+            except OSError as e:
+
+                print "Cant create FiFo file. {0} ".format(e.strerror)
+
+
+        while True:
+            
+            with open(self.pipe_name, 'w') as pipeout:
+                ts = time.time()
+                st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+                pipeout.write(st)
+            
+                pipeout.close()
+
+            #    time.sleep(1)
 
     def TerminateAll(self):
 
@@ -114,30 +114,30 @@ class Parent(object):
          
         self.child_1.start()
 
-    def readFifo(self):
-        
-        pipein = open(self.pipe_name, 'r')
-
-        if pipein == -1:
-
-            print "Can't open file"
-
-        else:
-
-       # while True:
-            
-            line = pipein.readline()[:-1]
-
-            print "Child %d got %s" % (os.getpid(), line)
+    #def readFifo(self):
+    #    
+    #    
+    #    with open(self.pipe_name, 'r') as pipein:
+    #        print "access"
 
 
+    #        while True:
+    #        
+    #            line = pipein.readline()
+
+    #            print "Child %d got %s" % (os.getpid(), line)
+
+    def deleteFifo(self):
+
+        os.unlink(self.pipe_name)
 
 
 pr = Parent()
 
-#pr.CreateChild()
+#pr.deleteFifo()
 pr.writeToFifo()
-pr.readFifo()
+pr.CreateChild()
+#pr.readFifo()
 
 
 
