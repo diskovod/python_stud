@@ -12,22 +12,24 @@ class Consumer (threading.Thread):
     def __init__(self, name):
         threading.Thread.__init__(self)
         self.pipe = None
+        self.pipefd = None
         self.name = name
 
     def setPipe(self, pipe_name):
         self.pipe = pipe_name
 
+    def connectPipe(self, pipe_name):
+        self.pipe = pipe_name
+        self.pipefd = os.open(self.pipe, os.O_RDONLY | os.O_NONBLOCK)
+
     def run(self):
         print "Starting " + self.name
-
-#        with os.popen(self.pipe, 'r') as pipein:
-        pipefd = os.open(self.pipe, os.O_RDONLY | os.O_NONBLOCK)
         p = select.poll()
-        p.register(pipefd, select.POLLIN)
+        p.register(self.pipefd, select.POLLIN)
         while True: 
             events = p.poll(100)
             for e in events:
-                line = os.read(pipefd, 255)
+                line = os.read(self.pipefd, 255)
                 if len(line) == 0:
                    continue
             
@@ -48,8 +50,8 @@ class Producer (object):
         except OSError, e:
             print "Failed to create FIFO: %s" % e
         else:
-            consumer.setPipe(pipe_path)
-            new_pipefd = os.open(pipe_path, os.O_RDWR)
+            consumer.connectPipe(pipe_path)
+            new_pipefd = os.open(pipe_path, os.O_WRONLY | os.O_NONBLOCK)
             self.pipes.append(new_pipefd)
             print "Consumer %s registered" % (consumer.name)
 
