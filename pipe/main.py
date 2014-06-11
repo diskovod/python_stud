@@ -53,7 +53,7 @@ class Child (threading.Thread):
 class Parent(object):
     def __init__(self):
 
-        self.pipe_name = "/work/test_pipe.txt"
+        self.pipe_name = "/work/work_1/test_pipe.txt"
         
         self.event = threading.Event()
 
@@ -77,14 +77,16 @@ class Parent(object):
                 print "Cant create FiFo file. {0} ".format(e.strerror)
 
 
-        while True:
+     #   while True:
+        print "Open write"  
+        with open(self.pipe_name, 'w') as pipeout:
+
+            print "Opened write"
+            ts = time.time()
+            st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
+            pipeout.write(st)
             
-            with open(self.pipe_name, 'w') as pipeout:
-                ts = time.time()
-                st = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-                pipeout.write(st)
-            
-                pipeout.close()
+           # pipeout.close()
 
             #    time.sleep(1)
 
@@ -107,26 +109,26 @@ class Parent(object):
         print 'got SIGTERM, Event started'
         self.TerminateAll()
 
-    def CreateChild(self):
+    def RunChild(self):
         
         
         print "Parent pid is: %s" % (self.cur_pid)
          
         self.child_1.start()
 
-    #def readFifo(self):
-    #    
-    #    
-    #    with open(self.pipe_name, 'r') as pipein:
-    #        print "access"
+    def readFifo(self):
+        
+        
+        with open(self.pipe_name, 'r') as pipein:
+            print "access"
 
 
-    #        while True:
-    #        
-    #            line = pipein.readline()
+          #  while True:
+            
+            line = pipein.readline()
 
-    #            print "Child %d got %s" % (os.getpid(), line)
-
+            print "Child %d got %s" % (os.getpid(), line)
+l
     def deleteFifo(self):
 
         os.unlink(self.pipe_name)
@@ -136,7 +138,7 @@ pr = Parent()
 
 #pr.deleteFifo()
 pr.writeToFifo()
-pr.CreateChild()
+pr.RunChild()
 #pr.readFifo()
 
 
