@@ -8,101 +8,61 @@ class ClientConnection(object):
     def __init__(self):
         self.host = 'www.pythonstud.com'
         self.port = 80
-        self.message = "GET / HTTP/1.0 \nHost: www.pythonstud.com \nConnection: close\r\n\r\n"
-        self.message_1 =  "GET / HTTP/1.0 \nHost: www.pythonstud.com/test.html\r\n\r\n"
-
-    def connectToServer(self):
+       
+    
+    def getRemoteIp(self):
 
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout( 5.0)
-
-        except socket.error, msg:
-            print 'Failed to create socket. Error code: ' + str(msg[0]) + ' , Error message : ' + msg[1]
-            sys.exit();
- 
-        print 'Socket Created'
-  
-        try:
+         
             remote_ip = socket.gethostbyname( self.host )
- 
+            
         except socket.gaierror:
             print 'Hostname could not be resolved. Exiting'
             sys.exit()
-     
-        #print 'Ip address of ' + self.host + ' is ' + remote_ip
- 
-        s.connect((remote_ip , self.port))
- 
-        print 'Socket Connected to ' + self.host + ' on ip ' + remote_ip
+        
+        return remote_ip
 
+    def socketConnect(self, socket, remote_ip):
+
+        return socket.connect((remote_ip, self.port))
+    
+    def http_get(self, socket, request, host):
+        
         try :
-            s.send(self.message)
+            socket.send("GET %s HTTP/1.1\nHost: %s\nConnection: keepalive\r\n\r\n" % (request, host))
         except socket.error:
             print 'Send failed'
             sys.exit()
  
-        reply = s.recv(4096)
-       # print 'Message send successfully'
- #       while 1:
-
- #           try:
- #               
- #
- #           except socket.timeout:
- #               print 'Socket timeout, loop and try recv() again'
- #               time.sleep( 5.0)
- #               # traceback.print_exc()
- #               continue
- #
- #           except:
- #               traceback.print_exc()
- #               print 'Other Socket err, exit and try creating socket again'
- #               # break from loop
- #               break
-
-        print reply
+        data = socket.recv(4096)
         
-#        s.close()
+        return data
 
-    def connectToServer_1(self):
-        try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        except socket.error, msg:
-            print 'Failed to create socket. Error code: ' + str(msg[0]) + ' , Error message : ' + msg[1]
-            sys.exit();
- 
+
+if __name__ == "__main__":
+
+    cc = ClientConnection()
+    
+    try:
+
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout( 5.0)
+
+    except socket.error, msg:
+        print 'Failed to create socket. Error code: ' + str(msg[0]) + ' , Error message : ' + msg[1]
+        sys.exit();
+        
         print 'Socket Created'
-  
-        try:
-            remote_ip = socket.gethostbyname( self.host )
- 
-        except socket.gaierror:
-            print 'Hostname could not be resolved. Exiting'
-            sys.exit()
-     
-        #print 'Ip address of ' + self.host + ' is ' + remote_ip
- 
-        s.connect((remote_ip , self.port))
- 
-        print 'Socket Connected to ' + self.host + ' on ip ' + remote_ip
+
         
-        try :
-            s.send(self.message_1)
-        except socket.error:
-            print 'Send failed'
-            sys.exit()
- 
-       # print 'Message send successfully'
+    remote_ip = cc.getRemoteIp()
 
-        reply = s.recv(4096)
-        
-        print reply
-        
-        s.close()
+    cc.socketConnect(s,remote_ip)
 
+    response_1 = cc.http_get(s, "/", "www.pythonstud.com")
+    response_2 = cc.http_get(s, "/test.html", "www.pythonstud.com")
 
+    print response_1
+    print response_2
 
-cc = ClientConnection()
-cc.connectToServer()
-cc.connectToServer_1()
+    s.close()
