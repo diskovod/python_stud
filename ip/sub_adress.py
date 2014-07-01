@@ -7,6 +7,7 @@ import sys
 import fcntl
 
 
+
 class SubAddress(object):
     def __init__(self):
         self.iface = "lo"
@@ -45,9 +46,18 @@ class SubAddress(object):
         return struct.unpack('!L', converted_subnet)
 
 
-    def getSubAddress(self, unpacked_ip, unpacked_subnet):
+    def getStructedAddress(self, unpacked_ip, unpacked_subnet):
 
-        return unpacked_ip & unpacked_subnet
+        return unpacked_ip[0] & unpacked_subnet[0]
+
+    def packNetAddressIp(self, subAddress):
+
+        return struct.pack('!L', subAddress)
+
+    def unconvertResult(self, finalsubAddress):
+        
+        return socket.inet_ntoa(finalsubAddress)
+
 
 
 
@@ -67,7 +77,12 @@ unpacked_ip = sa.unpackHostIp(converted_ip)
 
 unpacked_subnet = sa.unpackSubnet(converted_subnet)
 
-final_subAddress = sa.getSubAddress(unpacked_ip, unpacked_subnet)
+structedAddress = sa.getStructedAddress(unpacked_ip, unpacked_subnet)
+
+packedNetAddressIp = sa.packNetAddressIp(structedAddress)
+
+final_result = sa.unconvertResult(packedNetAddressIp)
+
 
 
 print "Your local ip: %s" % (local_ip)
@@ -78,4 +93,6 @@ print "Unpacked ip: %s" % (unpacked_ip)
 
 print "Unpacked Mask Address: %s" % (unpacked_subnet)
 
+print "Structed Subnetwork Address: %s " % (structedAddress)
 
+print "Subnetwork address is: %s" % (final_result)
