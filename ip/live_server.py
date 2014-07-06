@@ -88,6 +88,7 @@ class LiveServer(object):
             targetparts = target.split('.')
             for item in sublist:
                 (ip, mask) = item.split('/');
+                iptobin
                 ipparts = ip.split('.')
                 maskparts = mask.split('.')
                 valid = True
